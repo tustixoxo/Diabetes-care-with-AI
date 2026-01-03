@@ -4,9 +4,62 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Personalized Lifestyle Plan</title>
+  <title>{{ _('Personalized Lifestyle Plan') }}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
+    /* --- Navbar Improvement Section --- */
+    .navbar {
+      background-color: #1d4ed8; /* Tailwind blue-700 */
+      color: white;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      padding: 0.75rem 0;
+    }
+
+    .navbar-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 1.5rem;
+    }
+
+    .navbar-title {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: #fff;
+      text-shadow: 1px 1px 0 rgba(0,0,0,0.15), 2px 2px 0 rgba(0,0,0,0.08); /* Kept your 3D style */
+    }
+
+    .navbar-links {
+      display: flex !important; /* Forces items horizontal */
+      list-style: none;
+      gap: 1.5rem;
+      margin: 0;
+      padding: 0;
+    }
+
+    .navbar-links li a {
+      color: white;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: color 0.2s ease;
+    }
+
+    .navbar-links li a:hover {
+      color: #bfdbfe; /* Tailwind blue-200 */
+    }
+
+    /* Prevent content from hiding under the fixed navbar */
+    body {
+      padding-top: 80px; 
+    }
     body {
       background-image: radial-gradient(#dbeafe 1px, transparent 1px);
       background-size: 20px 20px;
@@ -114,33 +167,22 @@
     const btnText = document.getElementById('btnText');
     const btnSpinner = document.getElementById('btnSpinner');
 
-    const categoryIcons = {
-      diet: '🍽️',
-      exercise: '🏃',
-      stress: '🧘',
-      sleep: '😴',
-      monitoring: '📊'
-    };
+    const GENERATING_TEXT = "{{ _('Generating...') }}";
+    const GENERATE_TEXT = "{{ _('Generate Plan') }}";
+    const ERROR_TEXT = "{{ _('Something went wrong. Please try again.') }}";
 
+    const categoryIcons = { diet: '', exercise: '', stress: '', sleep: '', monitoring: '' };
     const categoryTitles = {
-      diet: 'Diet & Nutrition',
-      exercise: 'Exercise & Activity',
-      stress: 'Stress Management',
-      sleep: 'Sleep & Recovery',
-      monitoring: 'Health Monitoring'
-    };
-
-    const categoryColors = {
-      diet: 'from-green-400 to-green-600',
-      exercise: 'from-orange-400 to-orange-600',
-      stress: 'from-purple-400 to-purple-600',
-      sleep: 'from-indigo-400 to-indigo-600',
-      monitoring: 'from-red-400 to-red-600'
+      diet: "{{ _('Diet & Nutrition') }}",
+      exercise: "{{ _('Exercise & Activity') }}",
+      stress: "{{ _('Stress Management') }}",
+      sleep: "{{ _('Sleep & Recovery') }}",
+      monitoring: "{{ _('Health Monitoring') }}"
     };
 
     function setLoading(loading) {
       submitBtn.disabled = loading;
-      btnText.textContent = loading ? 'Generating...' : '🔍 Generate Plan';
+      btnText.textContent = loading ? GENERATING_TEXT : GENERATE_TEXT;
       btnSpinner.classList.toggle('hidden', !loading);
       submitBtn.classList.toggle('opacity-75', loading);
     }
@@ -150,16 +192,16 @@
 
       let profileHtml = `
         <div class="mb-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
-          <h3 class="text-lg font-semibold text-blue-800 mb-2">📋 Your Profile</h3>
+          <h3 class="text-lg font-semibold text-blue-800 mb-2">{{ _('Your Profile') }}</h3>
           <div class="grid grid-cols-3 gap-4 text-sm">
-            <div><span class="text-gray-600">Age:</span> <strong>${profile.age}</strong> (${profile.age_group})</div>
-            <div><span class="text-gray-600">BMI:</span> <strong>${profile.bmi}</strong> (${profile.bmi_category})</div>
-            <div><span class="text-gray-600">Activity:</span> <strong class="capitalize">${profile.activity}</strong></div>
+            <div><span class="text-gray-600">{{ _('Age') }}:</span> <strong>${profile.age}</strong> (${profile.age_group})</div>
+            <div><span class="text-gray-600">{{ _('BMI') }}:</span> <strong>${profile.bmi}</strong> (${profile.bmi_category})</div>
+            <div><span class="text-gray-600">{{ _('Activity') }}:</span> <strong class="capitalize">${profile.activity}</strong></div>
           </div>
         </div>
       `;
 
-      let planHtml = '<h3 class="text-2xl font-semibold mb-4 text-blue-700">🧠 Your Custom Lifestyle Plan</h3>';
+      let planHtml = '<h3 class="text-2xl font-semibold mb-4 text-blue-700">{{ _("Your Custom Lifestyle Plan") }}</h3>';
       planHtml += '<div class="grid gap-4">';
 
       for (const [category, tips] of Object.entries(plan)) {
@@ -171,7 +213,7 @@
                 <h4 class="font-semibold text-gray-800">${categoryTitles[category] || category}</h4>
               </div>
               <ul class="space-y-2">
-                ${tips.map(tip => `<li class="flex items-start gap-2 text-gray-700"><span class="text-green-500 mt-1">✓</span><span>${tip}</span></li>`).join('')}
+                ${tips.map(tip => `<li class="flex items-start gap-2 text-gray-700"><span class="text-green-500 mt-1">*</span><span>${tip}</span></li>`).join('')}
               </ul>
             </div>
           `;
@@ -181,7 +223,7 @@
       planHtml += '</div>';
 
       if (source === 'ai') {
-        planHtml += '<p class="text-xs text-gray-500 mt-4 text-center">✨ Personalized with AI</p>';
+        planHtml += '<p class="text-xs text-gray-500 mt-4 text-center">{{ _("Personalized with AI") }}</p>';
       }
 
       resultDiv.innerHTML = profileHtml + planHtml;
@@ -190,11 +232,7 @@
     }
 
     function renderError(message) {
-      resultDiv.innerHTML = `
-        <div class="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700">
-          <strong>Error:</strong> ${message}
-        </div>
-      `;
+      resultDiv.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-xl text-red-700"><strong>{{ _('Error') }}:</strong> ${message}</div>`;
       resultDiv.classList.remove('hidden');
       resultDiv.classList.add('show');
     }
@@ -203,11 +241,7 @@
       e.preventDefault();
       setLoading(true);
 
-      const formData = {
-        age: form.age.value,
-        bmi: form.bmi.value,
-        activity: form.activity.value
-      };
+      const formData = { age: form.age.value, bmi: form.bmi.value, activity: form.activity.value };
 
       try {
         const response = await fetch('/api/lifestyle-plan', {
@@ -217,19 +251,34 @@
         });
 
         const data = await response.json();
-
-        if (!response.ok) {
-          throw new Error(data.error || 'Failed to generate plan');
-        }
-
+        if (!response.ok) throw new Error(data.error || 'Failed to generate plan');
         renderPlan(data);
       } catch (error) {
         console.error('Error:', error);
-        renderError(error.message || 'Something went wrong. Please try again.');
+        renderError(error.message || ERROR_TEXT);
       } finally {
         setLoading(false);
       }
     });
+
+    // Language selector
+    document.getElementById('lang-btn').addEventListener('click', function(e) {
+      e.stopPropagation();
+      document.getElementById('lang-dropdown').classList.toggle('show');
+    });
+    document.addEventListener('click', function() {
+      document.getElementById('lang-dropdown').classList.remove('show');
+    });
+    function setLanguage(langCode) {
+      fetch('/api/set-language', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ language: langCode })
+      })
+      .then(response => response.json())
+      .then(data => { if (data.success) window.location.reload(); })
+      .catch(err => console.error('Language switch failed:', err));
+    }
   </script>
 </body>
 

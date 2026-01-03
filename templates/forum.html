@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Diabetes Care Forum</title>
+  <title>{{ _('Diabetes Care Forum') }}</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     @keyframes fadeIn {
@@ -137,7 +137,7 @@
           <div id="notificationDropdown"
             class="hidden absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-2xl border border-gray-200 z-50">
             <div class="p-4 border-b border-gray-100 flex justify-between items-center">
-              <h3 class="font-semibold text-gray-800">Notifications</h3>
+              <h3 class="font-semibold text-gray-800" id="notif-heading">{{ _('Notifications') }}</h3>
               <div class="flex gap-2">
                 <button id="markAllRead" class="text-xs text-blue-600 hover:text-blue-800" type="button">Mark all
                   read</button>
@@ -173,13 +173,13 @@
 
   <section class="bg-blue-700 text-white py-12">
     <div class="container mx-auto text-center">
-      <h1 class="text-3xl md:text-4xl font-extrabold tracking-wide">🩺 Diabetes Care Forum</h1>
-      <p class="text-blue-100 text-base mt-2">Share experiences, ask questions, and support the community.</p>
+      <h1 class="text-3xl md:text-4xl font-extrabold tracking-wide">{{ _('Diabetes Care Forum') }}</h1>
+      <p class="text-blue-100 text-base mt-2">{{ _('Share experiences, ask questions, and support the community.') }}</p>
     </div>
   </section>
   <main class="flex-grow container mx-auto px-6 py-10 max-w-3xl">
     <section class="mb-8 bg-white p-8 rounded-2xl shadow-xl border border-blue-100">
-      <h2 class="text-2xl font-semibold mb-4 text-blue-700">Share Your Story or Ask a Question</h2>
+      <h2 class="text-2xl font-semibold mb-4 text-blue-700">{{ _('Share Your Story or Ask a Question') }}</h2>
       <form id="postForm" class="flex flex-col gap-4">
         <textarea id="postContent" rows="4"
           class="p-5 border border-gray-300 rounded-2xl resize-none focus:outline-none focus:ring-4 focus:ring-blue-300 placeholder-gray-400 shadow-sm"
@@ -193,7 +193,7 @@
       </form>
     </section>
     <section class="mb-8 bg-white p-6 rounded-2xl shadow-lg border border-gray-100">
-      <h3 class="text-lg font-semibold text-gray-700 mb-4">🔍 Search & Filter Posts</h3>
+      <h3 class="text-lg font-semibold text-gray-700 mb-4">{{ _('Search & Filter Posts') }}</h3>
       <div class="mb-4">
         <div class="relative">
           <input type="text" id="searchInput"
@@ -248,8 +248,8 @@
   <footer class="bg-blue-50 text-center text-gray-500 text-sm py-4 border-t mt-8">© 2025 Diabetes Care Forum. Empowering
     lives, one post at a time.</footer>
 
-  <!-- Toast Notification Container -->
-  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2"></div>
+  <!-- Toast Notification Container with ARIA live region -->
+  <div id="toastContainer" class="fixed bottom-4 right-4 z-50 flex flex-col gap-2" role="alert" aria-live="assertive" aria-atomic="true"></div>
 
   <div id="settingsModal" class="hidden fixed inset-0 z-50 flex items-center justify-center">
     <div class="modal-overlay absolute inset-0" onclick="closeSettingsModal()"></div>
@@ -260,7 +260,7 @@
           class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
       </div>
       <div class="mb-6 p-4 bg-blue-50 rounded-xl">
-        <h3 class="font-semibold text-gray-700 mb-3">Your Profile</h3>
+        <h3 class="font-semibold text-gray-700 mb-3">{{ _('Your Profile') }}</h3>
         <div class="space-y-3">
           <div><label class="block text-sm text-gray-600 mb-1">Username</label><input type="text" id="settingsUsername"
               class="w-full p-2 border rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none"
@@ -320,7 +320,8 @@
 
     function toggleNotificationDropdown(e) {
       e.stopPropagation();
-      notificationDropdown.classList.toggle('hidden');
+      const isHidden = notificationDropdown.classList.toggle('hidden');
+      notificationBell.setAttribute('aria-expanded', !isHidden);
     }
 
     function openSettingsModal() {
@@ -396,17 +397,23 @@
     }
 
     function renderNotifications(notifs) {
-      if (!notifs || notifs.length === 0) { notificationList.innerHTML = '<p class="p-4 text-gray-500 text-center text-sm">No notifications yet</p>'; return; }
+      if (!notifs || notifs.length === 0) { notificationList.innerHTML = '<p class="p-4 text-gray-500 text-center text-sm" role="listitem">No notifications yet</p>'; return; }
       notificationList.innerHTML = notifs.map(n => {
-        const icon = n.type === 'reply' ? '💬' : n.type === 'mention' ? '📢' : '🔔';
+        const icon = n.type === 'reply' ? '[Reply]' : n.type === 'mention' ? '[Mention]' : '[Notification]';
         const time = new Date(n.timestamp).toLocaleString();
         const postId = n.post_id || 'null';
-        return '<div class="notification-item p-3 border-b border-gray-100 cursor-pointer ' + (n.read ? '' : 'notification-unread') + '" onclick="handleNotificationClick(' + n.id + ', ' + postId + ')"><div class="flex items-start gap-3"><span class="text-xl">' + icon + '</span><div class="flex-1"><p class="text-sm text-gray-800">' + n.message + '</p><p class="text-xs text-gray-400 mt-1">' + time + '</p></div></div></div>';
+        const unreadLabel = n.read ? '' : ' (unread)';
+        return '<div class="notification-item p-3 border-b border-gray-100 cursor-pointer ' + (n.read ? '' : 'notification-unread') + '" role="listitem" tabindex="0" onclick="handleNotificationClick(' + n.id + ', ' + postId + ')" onkeypress="if(event.key===\'Enter\')handleNotificationClick(' + n.id + ', ' + postId + ')"><div class="flex items-start gap-3"><span class="text-xl" aria-hidden="true">' + icon + '</span><div class="flex-1"><p class="text-sm text-gray-800">' + n.message + unreadLabel + '</p><p class="text-xs text-gray-400 mt-1">' + time + '</p></div></div></div>';
       }).join('');
     }
 
     function updateNotificationBadge(count) {
-      if (count > 0) { notificationBadge.textContent = count > 99 ? '99+' : count; notificationBadge.classList.remove('hidden'); }
+      if (count > 0) { 
+        const countText = count > 99 ? '99+' : count;
+        notificationBadge.textContent = countText; 
+        notificationBadge.setAttribute('aria-label', countText + ' unread notifications');
+        notificationBadge.classList.remove('hidden'); 
+      }
       else { notificationBadge.classList.add('hidden'); }
     }
 
@@ -416,10 +423,11 @@
 
     function showToast(message, type) {
       const toastContainer = document.getElementById('toastContainer');
-      const icon = type === 'mention' ? '📢' : type === 'reply' ? '💬' : '🔔';
+      const icon = type === 'mention' ? '[Mention]' : type === 'reply' ? '[Reply]' : '[Notification]';
       const toast = document.createElement('div');
       toast.className = 'toast bg-white rounded-lg shadow-lg border border-gray-200 p-4 flex items-start gap-3 max-w-sm cursor-pointer hover:bg-gray-50';
-      toast.innerHTML = '<span class="text-2xl">' + icon + '</span><div><p class="font-medium text-gray-800">New Notification</p><p class="text-sm text-gray-600">' + message + '</p></div><button class="ml-auto text-gray-400 hover:text-gray-600">&times;</button>';
+      toast.setAttribute('role', 'alert');
+      toast.innerHTML = '<span class="text-2xl" aria-hidden="true">' + icon + '</span><div><p class="font-medium text-gray-800">New Notification</p><p class="text-sm text-gray-600">' + message + '</p></div><button class="ml-auto text-gray-400 hover:text-gray-600" aria-label="Dismiss notification">&times;</button>';
       toast.onclick = () => { notificationDropdown.classList.remove('hidden'); toast.remove(); };
       toast.querySelector('button').onclick = (e) => { e.stopPropagation(); toast.remove(); };
       toastContainer.appendChild(toast);
@@ -472,7 +480,7 @@
       const indicator = document.createElement('div');
       indicator.id = 'replyIndicator';
       indicator.className = 'mb-2 p-2 bg-blue-100 rounded-lg text-sm text-blue-700 flex justify-between items-center';
-      indicator.innerHTML = '<span>💬 Replying to post #' + postId + '</span><button onclick="cancelReply()" type="button" class="text-blue-500 hover:text-blue-700">✕ Cancel</button>';
+      indicator.innerHTML = '<span>Replying to post #' + postId + '</span><button onclick="cancelReply()" type="button" class="text-blue-500 hover:text-blue-700">Cancel</button>';
       const existing = document.getElementById('replyIndicator');
       if (existing) existing.remove();
       postContent.parentElement.insertBefore(indicator, postContent);
@@ -542,6 +550,7 @@
       if (!validateDateRange()) return;
       setLoading(true);
       updateActiveFiltersDisplay();
+      announceToScreenReader('Loading posts...');
       try {
         const res = await fetch('/api/posts?' + buildQueryString());
         const data = await res.json();
@@ -554,25 +563,30 @@
           const hasFilters = filterState.search || filterState.startDate || filterState.endDate;
           (hasFilters ? noResults : noPosts).classList.remove('hidden');
           paginationControls.classList.add('hidden');
+          announceToScreenReader(hasFilters ? 'No posts found matching your search.' : 'No posts yet.');
           return;
         }
-        posts.forEach(post => {
+        posts.forEach((post, index) => {
           const time = new Date(post.timestamp).toLocaleString();
           const postEl = document.createElement('article');
           postEl.className = "post-card p-6 bg-white rounded-2xl shadow-md border border-gray-100 fade-in transition-all duration-300";
           postEl.setAttribute('data-post-id', post.id);
+          postEl.setAttribute('aria-posinset', index + 1);
+          postEl.setAttribute('aria-setsize', posts.length);
           let content = post.content;
           if (filterState.search) {
             const regex = new RegExp('(' + escapeRegex(filterState.search) + ')', 'gi');
             content = content.replace(regex, '<mark class="bg-yellow-200 px-1 rounded">$1</mark>');
           }
           content = content.replace(/@(\w+)/g, '<span class="text-blue-600 font-medium">@$1</span>');
-          postEl.innerHTML = '<p class="text-gray-800 leading-relaxed text-lg whitespace-pre-line">' + content + '</p><div class="mt-4 flex justify-between items-center"><span class="text-sm text-gray-500">🕒 ' + time + '</span><div class="flex gap-3"><button onclick="replyToPost(' + post.id + ')" type="button" class="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1">💬 Reply</button><button onclick="subscribeToPost(' + post.id + ')" type="button" class="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1">🔔 Follow</button></div></div>';
+          postEl.innerHTML = '<p class="text-gray-800 leading-relaxed text-lg whitespace-pre-line">' + content + '</p><div class="mt-4 flex justify-between items-center"><span class="text-sm text-gray-500">' + time + '</span><div class="flex gap-3"><button onclick="replyToPost(' + post.id + ')" type="button" class="text-sm text-gray-600 hover:text-gray-800 flex items-center gap-1" aria-label="Reply to this post">Reply</button><button onclick="subscribeToPost(' + post.id + ')" type="button" class="text-sm text-blue-600 hover:text-blue-800 flex items-center gap-1" aria-label="Follow this thread">Follow</button></div></div>';
           postsList.appendChild(postEl);
         });
         updatePagination(pagination);
+        announceToScreenReader('Loaded ' + posts.length + ' posts. Page ' + pagination.page + ' of ' + pagination.total_pages + '.');
       } catch (err) {
-        postsList.innerHTML = '<p class="text-red-500">Failed to load posts: ' + err.message + '</p>';
+        postsList.innerHTML = '<p class="text-red-500" role="alert">Failed to load posts: ' + err.message + '</p>';
+        announceToScreenReader('Error loading posts: ' + err.message);
       } finally {
         setLoading(false);
       }
@@ -605,12 +619,18 @@
       const content = postContent.value.trim();
       if (!content) return;
       try {
-        const res = await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content, author_id: currentUser ? getOrCreateUserId() : 'anonymous' }) });
+        announceToScreenReader('Posting your message...');
+        const res = await fetch('/api/posts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ content, author_id: currentUser ? getOrCreateUserId() : 'anonymous', parent_id: replyingToPostId }) });
         if (!res.ok) throw new Error((await res.json()).error || 'Failed to create post');
         postContent.value = '';
         charCount.textContent = '0/500';
+        cancelReply();
+        announceToScreenReader('Your post was published successfully.');
         fetchPosts();
-      } catch (err) { alert('Failed to create post: ' + err.message); }
+      } catch (err) { 
+        announceToScreenReader('Error: ' + err.message);
+        alert('Failed to create post: ' + err.message); 
+      }
     });
 
     // Initialize
