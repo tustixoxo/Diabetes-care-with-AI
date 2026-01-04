@@ -19,17 +19,17 @@
     <h1 class="text-3xl sm:text-4xl font-extrabold tracking-wide text-white dc-text-3d">🩺 Diabetes Care</h1>
     
     <!-- Desktop Menu -->
-    <nav class="hidden md:block">
-      <ul class="flex space-x-4 sm:space-x-6 text-base sm:text-lg font-semibold">
+  <nav class="hidden md:flex items-center space-x-6">
+      <ul class="flex space-x-4 sm:space-x-6 text-base sm:text-lg font-semibold items-center">
         <li><a href="/" class="hover:text-blue-300 transition">{{ _('Home') }}</a></li>
         <li><a href="/index" class="hover:text-blue-300 transition">{{ _('Prediction') }}</a></li>
         <li><a href="/life" class="hover:text-blue-300 transition">{{ _('Lifestyle Check') }}</a></li>
         <li><a href="/chatbot" class="hover:text-blue-300 transition">{{ _('Chatbot') }}</a></li>
         <li><a href="/explore" class="hover:text-blue-300 transition">{{ _('Explore Data') }}</a></li>
         <li><a href="/forum" class="hover:text-blue-300 transition">{{ _('Forum') }}</a></li>
-      </ul>
+    </ul>
       <!-- Language Selector -->
-      <div class="relative ml-4">
+      <div class="relative">
         <button id="lang-btn" class="flex items-center space-x-1 px-3 py-1 rounded hover:bg-blue-600 transition text-sm" aria-label="{{ _('Select language') }}">
           <span id="current-lang">{{ languages.get(current_language, 'English') }}</span>
           <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
